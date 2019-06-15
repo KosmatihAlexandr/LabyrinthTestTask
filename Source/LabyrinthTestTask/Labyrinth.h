@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,21 +6,60 @@
 #include "GameFramework/Actor.h"
 #include "Labyrinth.generated.h"
 
+class ULabyrinthGeneerator;
+struct FLabyrinthData;
+
 UCLASS()
 class LABYRINTHTESTTASK_API ALabyrinth : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
-	ALabyrinth();
+public:
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* Root;
+
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* PitchRotator;
+
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* YawRotator;
+
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* LabyrinthRoot;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
+    TSubclassOf<ULabyrinthGeneerator> LabyrinthGeneratorClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
+    UStaticMesh* WallMesh;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
+    UStaticMesh* FloorMesh;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
+    int32 Size;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
+    float WallSize;
+
+private:
+    ULabyrinthGeneerator* LabyrinthGenerator;
+
+    TArray<USceneComponent*> Walls;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	ALabyrinth();
 
+    UFUNCTION(BlueprintCallable, Category = "Labyrinth")
+    void GenerateLabyrinth();
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+    void MakeSideWaalsAndFloor();
+
+    void BuildWalls(FLabyrinthData& data);
+    void DeleteWalls();
 };
