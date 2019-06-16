@@ -31,9 +31,24 @@ void ALabyrinth::GenerateLabyrinth()
         return;
     }
 
-    FLabyrinthData data = LabyrinthGenerator->GenerateLabyrinth(Size, Size);
+    DeleteWalls();
+
+    FLabyrinthData data;
+
+    LabyrinthGenerator->GenerateLabyrinth(data, Size, Size);
 
     BuildWalls(data);
+}
+
+void ALabyrinth::AddYaw(float yaw)
+{
+    YawRotator->AddRelativeRotation(FRotator(0.f, yaw, 0.f));
+}
+
+void ALabyrinth::AddPitch(float pitch)
+{
+    float new_rotation = FMath::Clamp(PitchRotator->RelativeRotation.Pitch + pitch, 0.f, 90.f);
+    PitchRotator->SetRelativeRotation(FRotator(new_rotation, 0.f, 0.f));
 }
 
 void ALabyrinth::BeginPlay()
@@ -129,7 +144,7 @@ void ALabyrinth::MakeSideWaalsAndFloor()
     mesh_comp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 }
 
-void ALabyrinth::BuildWalls(FLabyrinthData & data)
+void ALabyrinth::BuildWalls(FLabyrinthData& data)
 {
     for (auto point : data.VerticalWalls)
     {
@@ -139,6 +154,7 @@ void ALabyrinth::BuildWalls(FLabyrinthData & data)
         mesh_comp->SetStaticMesh(WallMesh);
         FBox box = WallMesh->GetBoundingBox();
         mesh_comp->SetRelativeLocation(FVector(WallSize * (point.X + 1), WallSize * (point.Y + 0.5f), -box.Min.Z));
+        Walls.Add(mesh_comp);
     }
 
     for (auto point : data.HorisontalWalls)
@@ -150,6 +166,7 @@ void ALabyrinth::BuildWalls(FLabyrinthData & data)
         FBox box = WallMesh->GetBoundingBox();
         mesh_comp->SetRelativeLocation(FVector(WallSize * (point.X + 0.5f), WallSize * (point.Y + 1), -box.Min.Z));
         mesh_comp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+        Walls.Add(mesh_comp);
     }
 }
 
@@ -159,5 +176,7 @@ void ALabyrinth::DeleteWalls()
     {
         wall->DestroyComponent();
     }
+
+    Walls.Empty();
 }
 

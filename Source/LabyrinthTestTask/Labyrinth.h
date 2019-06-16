@@ -44,8 +44,8 @@ protected:
     float WallSize;
 
 private:
+    UPROPERTY()
     ULabyrinthGeneerator* LabyrinthGenerator;
-
     TArray<USceneComponent*> Walls;
 
 public:	
@@ -53,6 +53,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Labyrinth")
     void GenerateLabyrinth();
+
+    UFUNCTION(BlueprintCallable, Category = "Moving")
+    void AddYaw(float yaw);
+
+    UFUNCTION(BlueprintCallable, Category = "Moving")
+    void AddPitch(float pitch);
 
 protected:
 	virtual void BeginPlay() override;
