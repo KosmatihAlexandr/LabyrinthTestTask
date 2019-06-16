@@ -25,6 +25,16 @@ bool ULabyrinthGeneeratorEllers::GenerateLabyrinth(FLabyrinthData& OutData, int3
     for (uint32 i = 0; i < ((uint32)sizeY - 1); i++)
     {
         TSet<uint32> is_group_open;
+        TMap<uint32, uint32> group_counter;
+        for (uint32 j = 0; j < (uint32)sizeX; j++)
+        {
+            if (!group_counter.Contains(group_array[j]))
+            {
+                group_counter.Add(group_array[j], 0);
+            }
+            group_counter[group_array[j]] += 1;
+        }
+
         for (uint32 j = 0; j < ((uint32)sizeX - 1); j++)
         {
             if (group_array[j] == group_array[j + 1])
@@ -38,32 +48,30 @@ bool ULabyrinthGeneeratorEllers::GenerateLabyrinth(FLabyrinthData& OutData, int3
             else
             {
                 uint32 tmp_group = group_array[j + 1];
+                group_counter[group_array[j]] += group_counter[tmp_group];
                 for (uint32 k = j + 1; k < (uint32)sizeX; k++)
                 {
                     if (group_array[k] == tmp_group)
                     {
                         group_array[k] = group_array[j];
+                        group_counter[tmp_group] -= 1;
+                        if (group_counter[tmp_group] <= 0)
+                        {
+                            break;
+                        }
                     }
                 }
             }
 
-            bool is_last_of_grup = true;
-            for (uint32 k = j + 1; k < (uint32)sizeX; k++)
-            {
-                if (group_array[k] == group_array[j])
-                {
-                    is_last_of_grup = false;
-                    break;
-                }
-            }
-
-            if (FMath::RandBool() && (!is_last_of_grup || is_group_open.Contains(group_array[j])))
+            if (FMath::RandBool() && ((group_counter[group_array[j]] > 1) || is_group_open.Contains(group_array[j])))
             {
                 OutData.HorisontalWalls.Add(FIntPoint(j, i));
+                group_counter[group_array[j]] -= 1;
                 group_array[j] = sizeX * (i + 1) + j + 1;
             }
             else
             {
+                group_counter[group_array[j]] -= 1;
                 is_group_open.Add(group_array[j]);
             }
         }
@@ -75,6 +83,7 @@ bool ULabyrinthGeneeratorEllers::GenerateLabyrinth(FLabyrinthData& OutData, int3
         }
 
         is_group_open.Empty();
+        group_counter.Empty();
     }
 
     for (uint32 i = 0; i < ((uint32)sizeX - 1); i++)

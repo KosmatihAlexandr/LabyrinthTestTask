@@ -21,6 +21,7 @@ ALabyrinth::ALabyrinth()
     LabyrinthRoot = CreateDefaultSubobject<USceneComponent>(TEXT("LabyrinthRoot"));
     LabyrinthRoot->SetupAttachment(YawRotator);
     
+    SpawnZOffset = 200.f;
 }
 
 void ALabyrinth::GenerateLabyrinth()
@@ -49,6 +50,25 @@ void ALabyrinth::AddPitch(float pitch)
 {
     float new_rotation = FMath::Clamp(PitchRotator->RelativeRotation.Pitch + pitch, 0.f, 90.f);
     PitchRotator->SetRelativeRotation(FRotator(new_rotation, 0.f, 0.f));
+}
+
+void ALabyrinth::SpawnBall(FVector location)
+{
+    FVector rel_loc = LabyrinthRoot->GetComponentTransform().InverseTransformPosition(location);
+    rel_loc /= WallSize;
+    rel_loc -= FVector(0.5f);
+    rel_loc = FVector((FMath::FloorToFloat(rel_loc.X) + 0.5) * WallSize,
+        (FMath::FloorToFloat(rel_loc.Y) + 0.5) * WallSize, SpawnZOffset);
+    rel_loc = LabyrinthRoot->GetComponentTransform().TransformPosition(rel_loc);
+
+    UWorld* world = GetWorld();
+    if (!IsValid(world))
+    {
+        return;
+    }
+
+    AActor* ball = world->SpawnActor<AActor>(BallClass, rel_loc, FRotator());
+    Balls.Add(ball);
 }
 
 void ALabyrinth::BeginPlay()
@@ -177,6 +197,12 @@ void ALabyrinth::DeleteWalls()
         wall->DestroyComponent();
     }
 
+    for (auto ball : Balls)
+    {
+        ball->Destroy();
+    }
+
     Walls.Empty();
+    Balls.Empty();
 }
 

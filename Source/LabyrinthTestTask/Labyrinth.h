@@ -43,10 +43,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Labyrinth settings")
     float WallSize;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Ball settings")
+    TSubclassOf<AActor> BallClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Ball settings")
+    float SpawnZOffset;
+
 private:
     UPROPERTY()
     ULabyrinthGeneerator* LabyrinthGenerator;
     TArray<USceneComponent*> Walls;
+    TArray<AActor*> Balls;
 
 public:	
 	ALabyrinth();
@@ -59,6 +66,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Moving")
     void AddPitch(float pitch);
+
+    UFUNCTION(BlueprintCallable, Category = "Moving")
+    void SpawnBall(FVector location);
 
 protected:
 	virtual void BeginPlay() override;
