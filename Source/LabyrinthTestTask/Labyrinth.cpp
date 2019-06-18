@@ -199,7 +199,10 @@ void ALabyrinth::DeleteWalls()
 
     for (auto ball : Balls)
     {
-        ball->Destroy();
+        if (IsValid(ball))
+        {
+            ball->Destroy();
+        }
     }
 
     Walls.Empty();
